@@ -20,9 +20,18 @@ def runner(data, constituents, target=2020):
     return 'NOT_FOUND'
 
 
+def runner2(data, constituents, target=2020):
+    while data:
+        num1 = data.pop()
+        for num2 in data:
+            if (target - (num1 + num2)) in data:
+                return num1 * num2 * (target - (num1 + num2))
+    return 'NOT_FOUND'
+
+
 def main(data):
     """Main algorithm"""
-    return runner(data, 3, 2020)
+    return runner2(data, 3, 2020)
 
 
 if __name__ == '__main__':
@@ -34,7 +43,7 @@ if __name__ == '__main__':
                 'constituents': 3,
                 'target': 2020,
             },
-            'function': runner,
+            'function': runner2,
         },
     ]
 
