@@ -29,13 +29,13 @@ Here's were the modulo operator shines.
 
 This would become
 
-1. 0 % 3 (which is 0), so we get an **A**
-2. 1 % 3 (which is 1), so we get a **B**
-3. 2 % 3 (which is 2), so we get a **C**
-4. 3 % 3 (which is 0 again), so we get an **A**, again
-5. 4 % 3 (which is 1 again), so we get a **B**, again
-6. 5 % 3 (which is 2 again), so we get a **C**, again
-7. guess what number 6 % 3 will yield... I dare you ;)
+1. `0 % 3` (which is 0), so we get an **A**
+2. `1 % 3` (which is 1), so we get a **B**
+3. `2 % 3` (which is 2), so we get a **C**
+4. `3 % 3` (which is 0 again), so we get an **A**, again
+5. `4 % 3` (which is 1 again), so we get a **B**, again
+6. `5 % 3` (which is 2 again), so we get a **C**, again
+7. guess what number `6 % 3` will yield... I dare you ;)
 
 We have successfully constructed something which will loop over the contents of a list (or, at least in the case of Python, optionally a string).
 
