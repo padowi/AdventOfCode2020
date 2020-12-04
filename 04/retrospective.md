@@ -168,3 +168,70 @@ Finally got the AWK-solution working for 4a.
 Not as trivial as first expected, my AWK skills are seemingly fading... but now knowing what 4b entails... I ain't gonna go near that shit with AWK... ;D
 
 But it was fun (and frustrating) getting 4a to work in AWK.
+
+Perhaps I should also attempt to explain that code...
+
+So, AWK has a bunch of magic variables that determines how it parses stuff. RS (Record Separator) and FS (Field Separator) being the relevant ones here.
+
+We know that our input will have passport entries separated by a blank line, so our AWK record (a passport) is separated by two newlines (the newline ending the last line of the previous record, and the newline immediately after it, marking up the empty "separator" line.
+
+Now that we have established the boundaries of the records that AWK will work with (Unlike grep, AWK does not need to operate on a line by line basis, but the default RS is "\n" which makes it function like grep, working with one "row"/"line" at a time.
+
+But in our BEGIN-header, (another special magic directive, which is guaranteed to be executed by AWK before any input file is read/parsed) we override that, so now what AoC considers a record (passport), AWK will also consider a record.
+
+$0 is a special variable, and it will contain the entirety of the record currently being processed.
+
+Next we have the Field Separator, it defaults to "any whitespace" (i.e. something akin to `FS="[ \t]+"` (yes, I know there are more sorts of whitespace than tabs and spaces, but I'm tired...)
+
+We reset that to be either a space or a newline. So now, within our record, whenever AWK sees a space or a newline, it will know that a field just ended, and a new one is about to begin.
+
+Each field is assigned an index, starting with 1 and incrementing upwards. (It couldn't start with 0, since $0 is reserved for the whole record itself).
+
+In the BEGIN header I also set up an array (more like a dictionary, but AWK doesn't seem to have the concept of lists/sequences, so I had to make do), containing all the required passport fields.
+
+This array (`required`) will have the layout
+* 1: byr
+* 2: iyr
+* 3: eyr
+* ...
+* 7: pid
+
+We also set up a counter, `valid`, defaulting to 0. Whenever we happen upon a valid passport, we will increment this.
+
+We also have the special magic END rule, guaranteed to not execute until the entire input file has been processed, and in that we simply print the number of valid passports to the screen.
+
+Left to break down is the single rule that processes all the records.
+
+AWK programs usually follow a `RULE { ACTION }` syntax, where RULE is usally some type of condition, which, upon evaluating to true, triggers any and all action statements between the curly-braces.
+
+AWK has defaults for both RULE and ACTION, so in the event that one or the other is missing, it will still do something.
+
+In the absence of a RULE (like in my code, which starts with a curly-brace on line 8) AWK will simply use the default, which is `True`, and since True usually evaluates to... well, True, the ACTION part will trigger for every record found in the input file.
+
+(For completeness, the default ACTION if none has been provided, is `print $0` (i.e. print the entire record))
+
+I have a fleshed out action however.
+
+First I iterate through every field in this record, from i=1 (remember, fields inside the record starts at 1, since $0 is taken to output the entire record) to NF (another magic variable, **Number (of) Fields (in the Record)**
+
+For each index, (`i`) we ask AWK to access the contents of that field (`$i`) and we use split on that field, with a colon as the separator, to create a temporary array *pair*.
+
+pair[1] contains the key (e.g. byr or pid), and pair[2] contains the value given to that field in the input.
+
+I then just pull another variable (another array) out of thin air (*passports*) and start mashing data into it.
+
+Since we are doing all of this inside a loop, hunting for all the passport field-names, we couldn't pick and choose, that would have been nice, then we could have used the passport pid value as the key in the passports array, but then again, perhaps that isn't unique in the input, so instead we use yet another magic variable NR (**Number (of the) Record (currently being processed)**).
+
+That is as unique an ID as we are likely gonna get. And AWK just gave it to us to use, just like that, without us even asking. Good guy AWK.
+
+Why do we want to separate all the passport records into their own entries in the passports array? Good question, we could have made a 1-dimensional temporary passport array instead, since we only use that entry in the current iteration, and never again...
+
+Anyway... then we create a temporary score variable, this will be overwritten for every new iteration, we're OK with that.
+
+Because up next is iterating over all the required fields (well, if you remember above, the required array looked like 1: byr, 2: iyr, etc) so we are iterating over all the keys (1..7) and then accessing the value (byr, et al) from the required array, and checking if that field name is present in `passports[NR]` (i.e. the current entry), and if it is, increment the score.
+
+Once we have iterated over all the required fields, we check if the score variable contains 7 (I got lazy, and couldn't be arsed to figure out how to get the length of the required array, it is probably size() or count() or something, so instead, yeay, magic numbers in the code \:D/
+
+If the score is 7, it would indicate that the above loop managed to find all the required fields in the current record. Which means that this passport is valid, so we increment the valid counter.
+
+235 lines of English gibberish to explain 23 lines of AWK later: We are done for today!
