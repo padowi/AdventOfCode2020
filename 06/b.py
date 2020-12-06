@@ -16,7 +16,6 @@ def runner(data):
     for line in data:
         if line == '':
             groupID += 1
-            declarations[groupID]['memberCount'] = 0
             continue
 
         declarations[groupID]['memberCount'] = declarations[groupID].get('memberCount', 0) + 1
