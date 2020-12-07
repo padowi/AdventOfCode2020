@@ -14,20 +14,19 @@ PATTERN_SPLIT_INPUT = re.compile(r'^(?P<container>.*) bags contain (?P<containee
 PATTERN_SPLIT_CONTAINEES = re.compile(r'(?P<bag>(?P<amount>\d+) (?P<color>.*?) bags*(?:, |\.))')
 
 def countContainers(data, testData=False):
-    # this one will depend so very much on how we chose to
-    # represent the rules once we have parsed it.
-    # I am thinking that we need a dictionary of lists
-    # where the key is the colored bags, and the value is the list
-    # of bags in which they go
+    # this one will depend so very much on how we chose to represent the rules
+    # once we have parsed it.
+    # I am thinking that we need a dictionary of lists where the key is the
+    # colored bags, and the value is the list of bags in which they go
     # the problem input is all "container" -> "contained"
     # and the dict I wish to build will be
     # "contained" -> "containers"
-    # once that is done, we can pick the Shiny Gold bag from the keys,
-    # and start creating a set of colors, and for each color in that set
-    # add another set of colors where those colors where the key
-    # actually, we need a set (the final account of all colors), and
-    # a work list of colors we add, so that we can ignore processing the
-    # same color over and over.
+    # once that is done, we can pick the Shiny Gold bag from the keys, and
+    # start creating a set of colors, and for each color in that set add
+    # another set of colors where those colors where the key...
+    # actually, we need a set (the final account of all colors), and a work
+    # list of colors we add, so that we can ignore processing the same color
+    # over and over.
 
     relationships = defaultdict(list)
 
@@ -40,7 +39,8 @@ def countContainers(data, testData=False):
             containees = match.group('containees')
 
             for bag in PATTERN_SPLIT_CONTAINEES.findall(containees):
-                # each match here is a tuple of three elements (because of our three match groups in the pattern)
+                # each match here is a tuple of three elements (because of our
+                # three match groups in the pattern)
                 # element 0: the full matched string
                 # element 1: the amount
                 # element 2: the color
