@@ -38,7 +38,7 @@ def countContainers(data, testData=False):
                 # element 2: the color
                 relationships[container].append((int(bag[1]), bag[2]))
             if "no other bags." in containees:
-                relationships[container] = None
+                relationships[container] = list()
 
     if testData: pprint(relationships)
 
@@ -49,13 +49,12 @@ def countContainers(data, testData=False):
     investigate.append("shiny gold")
     while investigate:
         lead = investigate.pop(0)
-        if relationships[lead]:
-            for (amount, color) in relationships[lead]:
-                bagCount += amount
-                # I can't just add that color once, (dumb-ass), I need to add
-                # it as many times as there is amount in the tuple
-                for _ in range(amount):
-                    investigate.append(color)
+        for (amount, color) in relationships[lead]:
+            bagCount += amount
+            # I can't just add that color once, (dumb-ass), I need to add
+            # it as many times as there is amount in the tuple
+            for _ in range(amount):
+                investigate.append(color)
 
     return bagCount
 
