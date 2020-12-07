@@ -13,7 +13,7 @@ from pprint import pprint
 PATTERN_SPLIT_INPUT = re.compile(r'^(?P<container>.*) bags contain (?P<containees>.*)$')
 PATTERN_SPLIT_CONTAINEES = re.compile(r'(?P<bag>(?P<amount>\d+) (?P<color>.*?) bags*(?:, |\.))')
 
-def countContainersRecursively(data, testData=False):
+def countContainers(data, testData=False):
     # OK, so in this exercise, we are doing the reverse, i.e. figuring out how
     # many bags we'll be ending up bringing.
     # All of a sudden, the numbers are important, we can no longer use sets,
@@ -62,7 +62,7 @@ def countContainersRecursively(data, testData=False):
 
 def main(data):
     """Main algorithm"""
-    return countContainersRecursively(data)
+    return countContainers(data)
 
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 ],
                 'testData': True
             },
-            'function': countContainersRecursively,
+            'function': countContainers,
         },
         {
             'expectedOutcome': 126,
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 ],
                 'testData': True
             },
-            'function': countContainersRecursively,
+            'function': countContainers,
         },
     ]
 

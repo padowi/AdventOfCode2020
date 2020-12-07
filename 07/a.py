@@ -13,7 +13,7 @@ from pprint import pprint
 PATTERN_SPLIT_INPUT = re.compile(r'^(?P<container>.*) bags contain (?P<containees>.*)$')
 PATTERN_SPLIT_CONTAINEES = re.compile(r'(?P<bag>(?P<amount>\d+) (?P<color>.*?) bags*(?:, |\.))')
 
-def countContainersRecursively(data, testData=False):
+def countContainers(data, testData=False):
     # this one will depend so very much on how we chose to
     # represent the rules once we have parsed it.
     # I am thinking that we need a dictionary of lists
@@ -46,7 +46,7 @@ def countContainersRecursively(data, testData=False):
                 # element 2: the color
                 relationships[bag[2]].append(container)
 
-    if testData: print(relationships)
+    if testData: pprint(relationships)
 
     investigate.add("shiny gold")
 
@@ -61,7 +61,7 @@ def countContainersRecursively(data, testData=False):
 
 def main(data):
     """Main algorithm"""
-    return countContainersRecursively(data)
+    return countContainers(data)
 
 
 if __name__ == '__main__':
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 ],
                 'testData': True
             },
-            'function': countContainersRecursively,
+            'function': countContainers,
         },
         # add more vectors here...
     ]
