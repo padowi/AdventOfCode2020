@@ -15,7 +15,7 @@ I mean, we're not navigating across the sea doing maneuvers like that... oh, we 
 
 ## 12b ##
 
-Before solving 12a, and gaining access to the problem description for 12b, I told my [colleague](www.henkla.se/) that I bet that we'd *"misinterpreted"* the instructions in 12a, and that the ship actually turned when instructing it to go in a specific direction (N, E, S, W).
+Before solving 12a, and gaining access to the problem description for 12b, I told my [colleague](http://www.henkla.se/) that I bet that we'd *"misinterpreted"* the instructions in 12a, and that the ship actually turned when instructing it to go in a specific direction (N, E, S, W).
 
 I was correct in anticipating that we'd *"misinterpreted"* the functionality, but was way off on what we'd gotten wrong.
 
