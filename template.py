@@ -25,7 +25,7 @@ def runner(data):
 
 
 def main(data):
-    """Main algorithm"""
+    """Main program"""
     pass
 
 
