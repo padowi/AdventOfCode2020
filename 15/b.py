@@ -7,142 +7,194 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0]))))
 import toolbox as tb
 
+from collections import defaultdict, deque
 from pprint import pprint
 
 
-def find_last_occurrence_or_add(x, seq):
-    # damnit... the way I am structuring runner below,
-    # I'll never get to use this fancy function... :'(
-    # I wrote it as a tracer before I had read the full requiremens...
-    # so now instead of this, I'll just build some other function
-    # that will make more sense for the task, but I like the ugliness
-    # of this function so very much that even though it is dead code
-    # I'll leave it in here.
-    for i in range(1, len(seq) + 1):
-        try:
-            idx = seq.index(x, i * -1)
-            if True: # what a nasty piece of ugly-hack you are, I love it!
-                break
-        except ValueError:
-            continue
-    else: # woho, finally got to use for/else!!!
-        seq.append(x)
-        idx = len(seq)
-
-    return (seq, idx)
-
-
-def diff_last_two_occurrences_of(x, seq):
-    indices = list()
-    idx = len(seq) - 1
-    while len(indices) < 2:
-        if seq[idx] == x:
-            indices.append(idx)
-        idx -= 1
-
-    return max(indices) - min(indices)
-
-
-def runner(data, target):
-    # ok, so we will either be adding a new number (x not in spoken), or
-    # figuring out when number was last seen spoken.?rindex?(x)
-    # damnit... lists don't have an rindex() or rfind() or any such thing...
-    # strings... on the other hand, has rindex()
-    # but I can just build my own :D
-
-    # from the testdata and our input, it seems like the starting numbers
-    # are unique, so we don't need to apply rule-checking on them, and
-    # could just chuck them all into the list
-    # and since they're already in a list... well, I guess we're done
-    # with the starting phase :D
-
+def runner(data, target, debug=False):
     # update, after spending most of the morning wasting cycles and going
     # nowhere, fast, I am going to have to concede defeat, and rebuild the
     # algorithm.
 
-    while not len(data) == target:
-        if len(data) % 1000 == 0:
-            print(len(data))
-        lastNumber = data[-1]
-        if data.count(lastNumber) == 1:
-            data.append(0)
-            continue
+    # what if, instead of a loooooong list of integers, which will become more
+    # and more consuming to check, we create a dictionary, holding a list of at
+    # most the latest two indices?
+    # we also need to keep track of what the last number was.
+    # and then we also need a counter to get us to 30_000_000
 
-        # lastNumber can't occur 0 times, since we grabbed it off the back of
-        # the list just moments ago,
-        # and if we got here, there wasn't 1 singular occurrence either (since
-        # we'd have short-circuited out by now if so, which means that there
-        # are two or more occurrences of the number in the list.
-        data.append(diff_last_two_occurrences_of(lastNumber, data))
+    # create a dictionary where the default value is an empty list with a max
+    # size of two elements
+    numbers = defaultdict(lambda: deque(maxlen=2))
 
-    return data[-1]
+    # iterate over every element in data, return a tuple representing the index
+    # of the element, and the element (value)
+    for (idx, num) in enumerate(data, start=1):
+        # add to the dictionary, using the element as the key, to the correct
+        # list, the value of the first index that value was found at
+        numbers[num].append(idx)
+        if debug: print(num, idx, numbers)
 
+    # the latest mentioned number is also the last number in the input data
+    # which also happens to be whatever is left in the num variable
+    latest_number = num
+
+    # iterate over the sequence of numbers between len(data) and 30_000_000
+    # actually, since range will use the first number (start of range) as
+    # inclusive, and second number (target) as exclusive, we need to add 1 in
+    # both values
+    for i in range(idx + 1, target + 1):
+        if debug: print('---'*30)
+        if debug: print("beginning new iteration {} with latest_number {}".format(i, latest_number))
+        # if the list found in dictionary under key `latest_number` doesn't
+        # contain any elements
+        if len(numbers[latest_number]) == 1:
+            if debug: print("we have not seen {} before, latest_number should be set to 0".format(latest_number))
+            # we should set latest_number to 0
+            latest_number = 0
+            # and add the current index to dictionary[latest_number]
+            if debug: print("numbers before:")
+            if debug: pprint(numbers)
+            numbers[latest_number].append(i)
+            if debug: print("numbers after:")
+            if debug: pprint(numbers)
+        # otherwise
+        else:
+            # add this index to the deque for this latest number, then...
+            if debug: print("numbers before:")
+            if debug: pprint(numbers)
+            numbers[latest_number].append(i)
+            if debug: print("numbers after:")
+            if debug: pprint(numbers)
+            # we calculate the new latest_number by grabbing the two latest
+            # indices (the only two in the deque) and subtracting them
+            latest_number = max(numbers[latest_number]) - min(numbers[latest_number])
+            print('new latest_number calculated to: {}'.format(latest_number))
+        if debug: input()
+
+    return latest_number
 
 
 def main(data):
     """Main program"""
     data = [int(x) for x in data[0].split(',')]
-    return runner(data, 30000000)
+    return runner(data, 30_000_000)
 
 
 if __name__ == '__main__':
     testVectors = [
         {
-            'expectedOutcome': 175594,
+            'expectedOutcome': 436,
             'testInput': {
                 'data': [0, 3, 6],
-                'target': 30000000,
+                'target': 2020,
+                'debug': True,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 2578,
+            'expectedOutcome': 1,
             'testInput': {
                 'data': [1, 3, 2],
-                'target': 30000000,
+                'target': 2020,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 3544142,
+            'expectedOutcome': 10,
             'testInput': {
                 'data': [2, 1, 3],
-                'target': 30000000,
+                'target': 2020,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 261214,
+            'expectedOutcome': 27,
             'testInput': {
                 'data': [1, 2, 3],
-                'target': 30000000,
+                'target': 2020,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 6895259,
+            'expectedOutcome': 78,
             'testInput': {
                 'data': [2, 3, 1],
-                'target': 30000000,
+                'target': 2020,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 18,
+            'expectedOutcome': 438,
             'testInput': {
                 'data': [3, 2, 1],
-                'target': 30000000,
+                'target': 2020,
             },
             'function': runner,
         },
         {
-            'expectedOutcome': 362,
+            'expectedOutcome': 1836,
             'testInput': {
                 'data': [3, 1, 2],
-                'target': 30000000,
-            },
+                'target': 2020,
+                },
             'function': runner,
         },
+        # {
+            # 'expectedOutcome': 175594,
+            # 'testInput': {
+                # 'data': [0, 3, 6],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 2578,
+            # 'testInput': {
+                # 'data': [1, 3, 2],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 3544142,
+            # 'testInput': {
+                # 'data': [2, 1, 3],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 261214,
+            # 'testInput': {
+                # 'data': [1, 2, 3],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 6895259,
+            # 'testInput': {
+                # 'data': [2, 3, 1],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 18,
+            # 'testInput': {
+                # 'data': [3, 2, 1],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
+        # {
+            # 'expectedOutcome': 362,
+            # 'testInput': {
+                # 'data': [3, 1, 2],
+                # 'target': 30000000,
+            # },
+            # 'function': runner,
+        # },
     ]
 
     testResults = [
