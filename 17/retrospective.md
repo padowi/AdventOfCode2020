@@ -78,13 +78,13 @@ So, a little pseudo-code:
         for (coord in coordsToEvaluate) {
             if (coord in currentState.keys()) {
                 // active cube
-                activeNeighbourCount = getActiveNeightboursFor(coord, currentState);
+                activeNeighbourCount = getActiveNeighboursFor(coord, currentState);
                 if (activeNeighbourCount < 2 || activeNeighbourCount > 3) {
                     newState.remove(coord);
                 }
             } else {
                 // inactive cube
-                if (getActiveNeightboursFor(coord, currentState) == 3) {
+                if (getActiveNeighboursFor(coord, currentState) == 3) {
                     newState.add(coord);
                 }
             }
@@ -103,6 +103,72 @@ One thing I've learned today, about Python, is `copy.deepcopy`. Consider the abo
 `copy.deepcopy()`, however, is very thorough. Any complex data (like objects) will be instantiated with the same values, so while they will look and act identical, they now occupy different parts of memory, and are independent of each other (between the original dict and the copy). **VERY** nice!
 
 Now I am of course very tempted to rewrite 17a to conform with the above pseudo-code..., but first:
+
+UPDATE:
+
+    def bootstrapWorld(data):
+        worldState = set()
+        z = 0
+
+        for y, line in enumerate(data):
+            for x, state in enumerate(line):
+                if state == '#':
+                    worldState.add((x, y, z))
+
+        return worldState
+
+
+    def neighbours(coord):
+        result = list()
+        x, y, z = coord
+
+        for dx in range(x-1, x+2):
+            for dy in range(y-1, y+2):
+                for dz in range(z-1, z+2):
+                    tmpCoord = (dx, dy, dz)
+                    if  tmpCoord != coord:
+                        result.append(tmpCoord)
+
+        return result
+
+
+    def countActiveNeighboursFor(coord, worldState):
+        allNeighbours = neighbours(coord)
+        activeNeighbourCount = 0
+
+        for neighbour in allNeighbours:
+            if neighbour in worldState:
+                activeNeighbourCount += 1
+
+        return activeNeighbourCount
+
+
+    def runner(data, cycleCount):
+        currentState = bootstrapWorld(data);
+
+        for _ in range(cycleCount):
+            newState = currentState.copy()
+
+            coordsToEvaluate = set();
+            for coord in currentState:
+                coordsToEvaluate.add(coord)
+                for neighbourCoord in neighbours(coord):
+                    coordsToEvaluate.add(neighbourCoord)
+
+            for coord in coordsToEvaluate:
+                if coord in currentState:
+                    activeNeighbourCount = countActiveNeighboursFor(coord, currentState)
+                    if activeNeighbourCount < 2 or activeNeighbourCount > 3:
+                        newState.remove(coord)
+                else:
+                    if countActiveNeighboursFor(coord, currentState) == 3:
+                        newState.add(coord)
+
+            currentState = newState
+
+        return len(currentState)
+
+Working code, also without typos...
 
 
 ## 17b ##
