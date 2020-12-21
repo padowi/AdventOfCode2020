@@ -28,7 +28,7 @@ def parseRules(data):
     return rules
 
 
-def ruleToStrings(rules, idx, debug=False):
+def validMessage(rules, idx, msg, debug=False):
     state = ('', [idx])
     investigate = [ state ]
     completed = set()
@@ -37,6 +37,9 @@ def ruleToStrings(rules, idx, debug=False):
     while investigate:
         (string, indices) = investigate.pop(0)
         indices = list(indices)
+
+        if not msg.startswith(string):
+            continue
 
         while indices:
             idx = indices.pop(0)
@@ -67,7 +70,7 @@ def ruleToStrings(rules, idx, debug=False):
         completed.add(string)
 
     # once we have nothing more to investigate, we are done
-    return sorted(completed)
+    return msg in completed
 
 
 def parseInput(data):
@@ -107,13 +110,14 @@ def runner(data):
     # (although I assume that those two changed rules makes the problem space
     # balloon), so I'll commit here, without the fancy refactor, so that I can
     # run the original code (+ rule changes) on the beefier machine
+    #
+    # as expected, with the new test cases in place, and the new rules, it is
+    # far too slow, we need a new approach
     rules, messages = parseInput(data)
     valid_messages = list()
 
-    rule_strings = ruleToStrings(rules, 0, True)
-
     for msg in messages:
-        if msg in rule_strings:
+        if validMessage(rules, 0, msg):
             valid_messages.append(msg)
 
     return len(valid_messages)
@@ -124,96 +128,206 @@ def main(data):
     # apparently our data was incorrect in 19a and we need to fix it before
     # passing it on to runner
     data.remove('8: 42')
-    data.append('8: 42 | 42 8')
+    data.insert(0, '8: 42 | 42 8')
 
     data.remove('11: 42 31')
-    data.append('11: 42 31 | 42 11 31')
+    data.insert(0, '11: 42 31 | 42 11 31')
     return runner(data)
 
 
 if __name__ == '__main__':
     testVectors = [
-        {
-            'expectedOutcome': sorted(['aab', 'aba']),
-            'testInput': {
-                'rules': {
-                    0: [(1, 2,),],
-                    1: 'a',
-                    2: [(1, 3,), (3, 1,),],
-                    3: 'b',
-                },
-                'idx': 0,
+	# {
+	    # 'expectedOutcome': sorted(['aab', 'aba']),
+	    # 'testInput': {
+		# 'rules': {
+		    # 0: [(1, 2,),],
+		    # 1: 'a',
+		    # 2: [(1, 3,), (3, 1,),],
+		    # 3: 'b',
+		# },
+		# 'idx': 0,
 
-            },
-            'function': ruleToStrings,
-        },
-        {
-            'expectedOutcome': sorted([
-                'aaaabb', 'aaabab', 'abbabb', 'abbbab',
-                'aabaab', 'aabbbb', 'abaaab', 'ababbb',
-            ]),
-            'testInput': {
-                'rules': {
-                    0: [(4, 1, 5)],
-                    1: [(2, 3), (3, 2)],
-                    2: [(4, 4), (5, 5)],
-                    3: [(4, 5), (5, 4)],
-                    4: 'a',
-                    5: 'b',
-                },
-                'idx': 0,
+	    # },
+	    # 'function': ruleToStrings,
+	# },
+	# {
+	    # 'expectedOutcome': sorted([
+		# 'aaaabb', 'aaabab', 'abbabb', 'abbbab',
+		# 'aabaab', 'aabbbb', 'abaaab', 'ababbb',
+	    # ]),
+	    # 'testInput': {
+		# 'rules': {
+		    # 0: [(4, 1, 5)],
+		    # 1: [(2, 3), (3, 2)],
+		    # 2: [(4, 4), (5, 5)],
+		    # 3: [(4, 5), (5, 4)],
+		    # 4: 'a',
+		    # 5: 'b',
+		# },
+		# 'idx': 0,
 
-            },
-            'function': ruleToStrings,
-        },
-        {
-            'expectedOutcome': sorted(['a']),
-            'testInput': {
-                'rules': {
-                    0: 'a',
-                    1: 'a',
-                    2: [(1, 3,), (3, 1,),],
-                    3: 'b',
-                },
-                'idx': 0,
+	    # },
+	    # 'function': ruleToStrings,
+	# },
+	# {
+	    # 'expectedOutcome': sorted(['a']),
+	    # 'testInput': {
+		# 'rules': {
+		    # 0: 'a',
+		    # 1: 'a',
+		    # 2: [(1, 3,), (3, 1,),],
+		    # 3: 'b',
+		# },
+		# 'idx': 0,
 
+	    # },
+	    # 'function': ruleToStrings,
+	# },
+	# {
+	    # 'expectedOutcome': {
+		    # 0: [(1, 2,),],
+		    # 1: 'a',
+		    # 2: [(1, 3,), (3, 1,),],
+		    # 3: 'b',
+		# },
+	    # 'testInput': {
+		# 'data': [
+		    # '0: 1 2',
+		    # '1: "a"',
+		    # '2: 1 3 | 3 1',
+		    # '3: "b"',
+		# ],
+	    # },
+	    # 'function': parseRules,
+	# },
+	# {
+	    # 'expectedOutcome': 2,
+	    # 'testInput': {
+		# 'data': [
+		    # '0: 4 1 5',
+		    # '1: 2 3 | 3 2',
+		    # '2: 4 4 | 5 5',
+		    # '3: 4 5 | 5 4',
+		    # '4: "a"',
+		    # '5: "b"',
+		    # '',
+		    # 'ababbb',
+		    # 'bababa',
+		    # 'abbbab',
+		    # 'aaabbb',
+		    # 'aaaabbb',
+		# ],
+	    # },
+	    # 'function': runner,
+	# },
+        {
+            'expectedOutcome': 3,
+            'testInput': {
+		'data': [
+		    '42: 9 14 | 10 1',
+		    '9: 14 27 | 1 26',
+		    '10: 23 14 | 28 1',
+		    '1: "a"',
+		    '11: 42 31',
+		    '5: 1 14 | 15 1',
+		    '19: 14 1 | 14 14',
+		    '12: 24 14 | 19 1',
+		    '16: 15 1 | 14 14',
+		    '31: 14 17 | 1 13',
+		    '6: 14 14 | 1 14',
+		    '2: 1 24 | 14 4',
+		    '0: 8 11',
+		    '13: 14 3 | 1 12',
+		    '15: 1 | 14',
+		    '17: 14 2 | 1 7',
+		    '23: 25 1 | 22 14',
+		    '28: 16 1',
+		    '4: 1 1',
+		    '20: 14 14 | 1 15',
+		    '3: 5 14 | 16 1',
+		    '27: 1 6 | 14 18',
+		    '14: "b"',
+		    '21: 14 1 | 1 14',
+		    '25: 1 1 | 1 14',
+		    '22: 14 14',
+		    '8: 42',
+		    '26: 14 22 | 1 20',
+		    '18: 15 15',
+		    '7: 14 5 | 1 21',
+		    '24: 14 1',
+		    '',
+		    'abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa',
+		    'bbabbbbaabaabba',
+		    'babbbbaabbbbbabbbbbbaabaaabaaa',
+		    'aaabbbbbbaaaabaababaabababbabaaabbababababaaa',
+		    'bbbbbbbaaaabbbbaaabbabaaa',
+		    'bbbababbbbaaaaaaaabbababaaababaabab',
+		    'ababaaaaaabaaab',
+		    'ababaaaaabbbaba',
+		    'baabbaaaabbaaaababbaababb',
+		    'abbbbabbbbaaaababbbbbbaaaababb',
+		    'aaaaabbaabaaaaababaa',
+		    'aaaabbaaaabbaaa',
+		    'aaaabbaabbaaaaaaabbbabbbaaabbaabaaa',
+		    'babaaabbbaaabaababbaabababaaab',
+		    'aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba',
+		    ],
             },
-            'function': ruleToStrings,
+            'function': runner,
         },
         {
-            'expectedOutcome': {
-                    0: [(1, 2,),],
-                    1: 'a',
-                    2: [(1, 3,), (3, 1,),],
-                    3: 'b',
-                },
+            'expectedOutcome': 12,
             'testInput': {
-                'data': [
-                    '0: 1 2',
-                    '1: "a"',
-                    '2: 1 3 | 3 1',
-                    '3: "b"',
-                ],
-            },
-            'function': parseRules,
-        },
-        {
-            'expectedOutcome': 2,
-            'testInput': {
-                'data': [
-                    '0: 4 1 5',
-                    '1: 2 3 | 3 2',
-                    '2: 4 4 | 5 5',
-                    '3: 4 5 | 5 4',
-                    '4: "a"',
-                    '5: "b"',
-                    '',
-                    'ababbb',
-                    'bababa',
-                    'abbbab',
-                    'aaabbb',
-                    'aaaabbb',
-                ],
+		'data': [
+		    '42: 9 14 | 10 1',
+		    '9: 14 27 | 1 26',
+		    '10: 23 14 | 28 1',
+		    '1: "a"',
+		    '11: 42 31 | 42 11 31',
+		    '5: 1 14 | 15 1',
+		    '19: 14 1 | 14 14',
+		    '12: 24 14 | 19 1',
+		    '16: 15 1 | 14 14',
+		    '31: 14 17 | 1 13',
+		    '6: 14 14 | 1 14',
+		    '2: 1 24 | 14 4',
+		    '0: 8 11',
+		    '13: 14 3 | 1 12',
+		    '15: 1 | 14',
+		    '17: 14 2 | 1 7',
+		    '23: 25 1 | 22 14',
+		    '28: 16 1',
+		    '4: 1 1',
+		    '20: 14 14 | 1 15',
+		    '3: 5 14 | 16 1',
+		    '27: 1 6 | 14 18',
+		    '14: "b"',
+		    '21: 14 1 | 1 14',
+		    '25: 1 1 | 1 14',
+		    '22: 14 14',
+		    '8: 42 | 42 8',
+		    '26: 14 22 | 1 20',
+		    '18: 15 15',
+		    '7: 14 5 | 1 21',
+		    '24: 14 1',
+		    '',
+		    'abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa',
+		    'bbabbbbaabaabba',
+		    'babbbbaabbbbbabbbbbbaabaaabaaa',
+		    'aaabbbbbbaaaabaababaabababbabaaabbababababaaa',
+		    'bbbbbbbaaaabbbbaaabbabaaa',
+		    'bbbababbbbaaaaaaaabbababaaababaabab',
+		    'ababaaaaaabaaab',
+		    'ababaaaaabbbaba',
+		    'baabbaaaabbaaaababbaababb',
+		    'abbbbabbbbaaaababbbbbbaaaababb',
+		    'aaaaabbaabaaaaababaa',
+		    'aaaabbaaaabbaaa',
+		    'aaaabbaabbaaaaaaabbbabbbaaabbaabaaa',
+		    'babaaabbbaaabaababbaabababaaab',
+		    'aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba',
+		    ],
             },
             'function': runner,
         },
