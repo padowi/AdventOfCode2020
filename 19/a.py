@@ -35,49 +35,36 @@ def ruleToStrings(rules, idx, debug=False):
     string_count = 0
 
     while investigate:
-        # if debug: print("\n\n\n\n\n")
-        # if debug: print("new iteration")
-        # if debug: pprint(rules)
-        # if debug: print(investigate)
         (string, indices) = investigate.pop(0)
-        # if debug: print(string, indices)
         indices = list(indices)
-
 
         while indices:
             idx = indices.pop(0)
-            # if debug: print(f"\tfound an index ({idx})")
 
             if type(rules[idx]) != list:
                 string += rules[idx]
                 continue
 
             if len(rules[idx]) == 1:
-                # if debug: print("no branching, only extending the string, by adding indices to evaluate for this string")
                 for otherIndex in reversed(rules[idx][0]):
-                    # if debug: print(f"\tadding index {otherIndex} to {indices}")
                     indices.insert(0, otherIndex)
-                # if debug: print(f"done adding indices, current indices for string '{string}' are: {indices}")
             else:
                 # here is where it gets interesting
                 # we are gonna branch here.
                 # on the one hand, we are going to continue down a path
                 # but at the same time, we need to record our current state,
                 # along with the indices we didn't follow
-                # if debug: print("fork in the road, we have multiple choices: {}".format(rules[idx]))
-                # if debug: print(f"\tinvestigate before append: {investigate}")
-                # actually, this seems wrong, what if we have more indices to process? those should be counted too, right?
+
+                # actually, this seems wrong, what if we have more indices to
+                # process? those should be counted too, right?
                 sideTrackIndices = list(rules[idx][1])
                 sideTrackIndices.extend(indices)
                 investigate.append( (string, sideTrackIndices ) )
-                # if debug: print("\tinvestigate after append:")
-                # if debug: print(investigate)
+
                 for otherIndex in reversed(rules[idx][0]):
                     indices.insert(0, otherIndex)
 
         # once we have no more indices to follow, this string is complete
-        if debug: string_count += 1
-        if debug: print(f"no more indices, we have a complete string ({string}) ({string_count} in total so far)")
         completed.add(string)
 
     # once we have nothing more to investigate, we are done
